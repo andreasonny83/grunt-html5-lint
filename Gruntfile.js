@@ -25,6 +25,7 @@ module.exports = function( grunt ) {
   grunt.loadTasks( "tasks" );
 
   // These plugins provide necessary tasks.
+  grunt.loadNpmTasks( "grunt-contrib-nodeunit" );
   grunt.loadNpmTasks( "grunt-contrib-jshint" );
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this

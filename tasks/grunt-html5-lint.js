@@ -5,20 +5,20 @@ module.exports = function( grunt ) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerTask( "grunt-html5-lint", "HTML5 validation", function() {
-    grunt.config.requires( "grunt-html5-lint.views" );
-    grunt.config.requires( "grunt-html5-lint.templates" );
+  grunt.registerTask( "html5lint", "HTML5 validation", function() {
+    grunt.config.requires( "html5lint.views" );
+    grunt.config.requires( "html5lint.templates" );
 
     var html5Lint = require( "html5-lint" ),
         nunjucks = require( "nunjucks" ),
-        views = grunt.config( "grunt-html5-lint.views" ),
-        defaults = grunt.config( "grunt-html5-lint.defaults" ) || {},
-        files = grunt.config( "grunt-html5-lint.templates" ),
+        views = grunt.config( "html5lint.views" ),
+        defaults = grunt.config( "html5lint.defaults" ) || {},
+        files = grunt.config( "html5lint.templates" ),
         env = new nunjucks.Environment( new nunjucks.FileSystemLoader( views ) ),
         done = this.async(),
         pending = files.length,
         errors = 0,
-        ignoreList = grunt.config( "grunt-html5-lint.ignoreList" ) || [];
+        ignoreList = grunt.config( "html5lint.ignoreList" ) || [];
 
     function complete() {
       pending--;
