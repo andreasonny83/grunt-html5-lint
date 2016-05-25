@@ -1,68 +1,78 @@
-"use strict";
-
 module.exports = function( grunt ) {
+  'use strict';
 
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerTask( "html5lint", "HTML5 validation", function() {
-    grunt.config.requires( "html5lint.views" );
-    grunt.config.requires( "html5lint.templates" );
+  grunt.registerTask('html5lint', 'HTML5 validation', function() {
+    grunt.config.requires('html5lint.view');
+    grunt.config.requires('html5lint.template');
 
-    var html5Lint = require( "html5-lint" ),
-        nunjucks = require( "nunjucks" ),
-        views = grunt.config( "html5lint.views" ),
-        defaults = grunt.config( "html5lint.defaults" ) || {},
-        files = grunt.config( "html5lint.templates" ),
-        env = new nunjucks.Environment( new nunjucks.FileSystemLoader( views ) ),
-        done = this.async(),
-        pending = files.length,
-        errors = 0,
-        ignoreList = grunt.config( "html5lint.ignoreList" ) || [];
+    var html5Lint = require('html5-lint');
+    var nunjucks = require('nunjucks');
+    var views = grunt.config('html5lint.views');
+    var defaults = grunt.config('html5lint.defaults') || {};
+    var files = grunt.config('html5lint.templates');
+    var env = new nunjucks.Environment(new nunjucks.FileSystemLoader(views));
+    var done = this.async();
+    var pending = files.length;
+    var errors = 0;
+    var ignoreList = grunt.config('html5lint.ignoreList') || [];
 
     function complete() {
-      pending--;
-      if ( pending === 0 ) {
-        var passed = errors === 0;
-        if ( passed ) {
-          grunt.log.ok( files.length + " file" + ( files.length === 1 ? "" : "s" ) + " lint free." );
-        }
-        done( passed );
+      pending -= 1;
+
+      if (!pending && !errors) {
+        grunt.log
+          .ok([
+              files.length,
+              ' file',
+              files.length === 1 ? '' : 's',
+              ' lint free.'
+            ].join(''));
       }
+
+      done(errors);
     }
 
-    files.forEach( function( file ) {
-      var html = env.getTemplate( file ).render( defaults );
+    files.forEach(function(file) {
+      var html = env.getTemplate(file).render(defaults);
 
-      html5Lint( html, function( err, results ) {
-        if ( err ) {
-          grunt.fatal( "Unable to connect to validation server." );
-          return;
+      html5Lint(html, function(err, results) {
+        if (err) {
+          return grunt.fatal('Unable to connect to validation server.');
         }
-        if ( results.messages.length ) {
-          grunt.log.subhead( file );
-          results.messages.forEach( function( msg ) {
-            var type = msg.type, // error or warning
-                message = msg.message,
-                formatted = "  " + type + ": " + message;
 
-            var ignored = ignoreList.some( function( ignore ) {
+        if (results.messages.length) {
+          grunt.log.subhead(file);
+
+          results.messages.forEach(function(msg) {
+            var type = msg.type; // error or warning
+            var message = msg.message;
+            var formatted = [
+                            '  ',
+                            type,
+                            ': ',
+                            message
+                          ].join('');
+
+            var ignored = ignoreList.some(function(ignore) {
               return ignore === message;
-            });                
+            });
 
-            if ( !ignored ) {            
-              if ( type === "error" ) {
-                errors++;
-                grunt.log.error( formatted );
-              } else if ( type !== "ignored" && type !== "error" ) {
-                grunt.fail.warn( formatted );
+            if (!ignored) {
+              if (type === 'error') {
+                errors += 1;
+                grunt.log.error(formatted);
+              } else if ( type !== 'ignored') {
+                grunt.fail.warn(formatted);
               }
             }
           });
         }
+
         complete();
       });
     });
   });
 };
-
